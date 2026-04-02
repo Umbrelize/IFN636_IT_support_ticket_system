@@ -11,16 +11,10 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem('user');
     const savedToken = localStorage.getItem('token');
 
-    if (
-      savedUser &&
-      savedUser !== 'undefined' &&
-      savedUser !== 'null' &&
-      savedToken
-    ) {
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (error) {
-        console.error('Invalid user data in localStorage:', error);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         setUser(null);
@@ -33,23 +27,20 @@ export const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     const response = await api.post('/api/auth/login', formData);
 
-    // แปลง response backend ให้เป็น format ที่ frontend ใช้ต่อได้
     const userData = {
       id: response.data.id,
       name: response.data.name,
       email: response.data.email,
-      role: response.data.role || 'user', // fallback ไว้ก่อน ถ้า backend ยังไม่ส่ง role
+      role: response.data.role || 'user',
+      university: response.data.university || '',
+      address: response.data.address || '',
     };
 
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('user', JSON.stringify(userData));
-
     setUser(userData);
 
-    return {
-      token: response.data.token,
-      user: userData,
-    };
+    return response.data;
   };
 
   const register = async (formData) => {
@@ -63,6 +54,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (updatedUser, token) => {
+    const newUser = {
+      ...updatedUser,
+    };
+
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -71,6 +75,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateUser,
         isAuthenticated: !!user,
       }}
     >

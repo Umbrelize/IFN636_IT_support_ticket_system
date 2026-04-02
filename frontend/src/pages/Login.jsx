@@ -1,64 +1,88 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
     try {
       const data = await login(formData);
-      console.log("LOGIN RESPONSE:", data);
-      if (data.user.role === 'admin') {
+
+      if (data.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
     } catch (error) {
-    console.log("ERROR:", error.response?.data);
-      setError(error.response?.data?.message || "Login failed. Please try again.");
+      setError(error.response?.data?.message || 'Login failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Login</h1>
+        <p className="auth-subtitle">Sign in to your IT support account</p>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="error-text">{error}</p>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-          required
-        />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-          required
-        />
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
 
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-          Login
-        </button>
+          <button type="submit" className="primary-btn auth-btn" disabled={submitting}>
+            {submitting ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
 
-        <p className="text-center mt-4">
-          No account? <Link to="/register" className="text-blue-600">Register</Link>
+        <p className="auth-footer">
+          Don&apos;t have an account? <Link to="/register">Register</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 };

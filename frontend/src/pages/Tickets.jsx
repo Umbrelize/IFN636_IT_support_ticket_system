@@ -17,8 +17,7 @@ const Tickets = () => {
         const response = await api.get('/api/tickets');
         setTickets(response.data);
       } catch (error) {
-        console.error('FETCH TICKETS ERROR:', error.response?.data || error.message);
-        setError('Failed to fetch tickets.');
+        setError(error.response?.data?.message || 'Failed to fetch tickets');
       } finally {
         setLoading(false);
       }
@@ -28,29 +27,33 @@ const Tickets = () => {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto mt-10 px-4">
-      <h1 className="text-3xl font-bold mb-2">
-        {user?.role === 'admin' ? 'Manage Tickets' : 'My Tickets'}
-      </h1>
+    <div className="main-content">
+      <div className="top-header">
+        <div>
+          <h1>{user?.role === 'admin' ? 'Manage Tickets' : 'My Tickets'}</h1>
+          <p>Create and manage support tickets</p>
+        </div>
+      </div>
 
-      {loading && <p>Loading tickets...</p>}
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
-      {!loading && !error && (
-        <>
-          <TicketForm
-            tickets={tickets}
-            setTickets={setTickets}
-            editingTicket={editingTicket}
-            setEditingTicket={setEditingTicket}
-          />
+      <TicketForm
+        tickets={tickets}
+        setTickets={setTickets}
+        editingTicket={editingTicket}
+        setEditingTicket={setEditingTicket}
+      />
 
-          <TicketList
-            tickets={tickets}
-            setTickets={setTickets}
-            setEditingTicket={setEditingTicket}
-          />
-        </>
+      {loading ? (
+        <div className="card">
+          <p>Loading tickets...</p>
+        </div>
+      ) : (
+        <TicketList
+          tickets={tickets}
+          setTickets={setTickets}
+          setEditingTicket={setEditingTicket}
+        />
       )}
     </div>
   );

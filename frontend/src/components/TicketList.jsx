@@ -1,56 +1,128 @@
 import api from '../axiosConfig';
-import { useAuth } from '../context/AuthContext';
 
-const TicketList = ({ tickets, setTickets, setEditingTicket }) => {
-  const { user } = useAuth();
-
+const TicketList = ({
+  tickets,
+  setTickets,
+  setEditingTicket,
+  isAdmin = false,
+}) => {
   const handleDelete = async (ticketId) => {
+    const confirmed = window.confirm('Are you sure you want to delete this ticket?');
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
-      await api.delete(`/api/tickets/${ticketId}`);
+      const endpoint = isAdmin
+        ? `/api/tickets/admin/${ticketId}`
+        : `/api/tickets/${ticketId}`;
+
+      await api.delete(endpoint);
+
       setTickets(tickets.filter((ticket) => ticket._id !== ticketId));
     } catch (error) {
-      console.error('DELETE TICKET ERROR:', error.response?.data || error.message);
-      alert('Failed to delete ticket.');
+      alert(error.response?.data?.message || 'Failed to delete ticket');
     }
   };
 
+  const getStatusClass = (status) => {
+    if (status === 'Open') return 'badge badge-open';
+    if (status === 'In Progress') return 'badge badge-progress';
+    if (status === 'Resolved') return 'badge badge-resolved';
+    if (status === 'Closed') return 'badge badge-closed';
+    return 'badge';
+  };
+
+  const getPriorityClass = (priority) => {
+    if (priority === 'High') return 'priority high';
+    if (priority === 'Medium') return 'priority medium';
+    return 'priority low';
+  };
+
   if (!tickets.length) {
-    return <p>No tickets found.</p>;
+    return (
+      <div className="card">
+        <p>No tickets found.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      {tickets.map((ticket) => (
-        <div key={ticket._id} className="bg-white p-4 rounded shadow">
-          <h3 className="text-xl font-bold">{ticket.subject}</h3>
-          <p className="mb-2">{ticket.description}</p>
-          <p><strong>Category:</strong> {ticket.category}</p>
-          <p><strong>Priority:</strong> {ticket.priority}</p>
-          <p><strong>Status:</strong> {ticket.status}</p>
+    <div className="card table-card">
+      <div className="table-scroll">
+        <table className="ticket-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              {isAdmin && <th>User</th>}
+              <th>Category</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Created</th>
+              <th>Image</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
 
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => setEditingTicket(ticket)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Edit
-            </button>
+          <tbody>
+            {tickets.map((ticket) => (
+              <tr key={ticket._id}>
+                <td>
+                  <div className="ticket-subject">{ticket.subject}</div>
+                  <div className="ticket-description">{ticket.description}</div>
+                </td>
 
-            <button
-              onClick={() => handleDelete(ticket._id)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
+                {isAdmin && (
+                  <td>
+                    {ticket.user?.name || '-'}
+                    <br />
+                    <small>{ticket.user?.email || ''}</small>
+                  </td>
+                )}
 
-            {user?.role === 'admin' && (
-              <span className="ml-auto text-sm text-gray-500">
-                Admin can manage all tickets
-              </span>
-            )}
-          </div>
-        </div>
-      ))}
+                <td>{ticket.category}</td>
+                <td>
+                  <span className={getStatusClass(ticket.status)}>
+                    {ticket.status}
+                  </span>
+                </td>
+                <td>
+                  <span className={getPriorityClass(ticket.priority)}>
+                    {ticket.priority}
+                  </span>
+                </td>
+                <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                <td>
+                  {ticket.image ? (
+                    <a href={ticket.image} target="_blank" rel="noreferrer">
+                      View
+                    </a>
+                  ) : (
+                    '-'
+                  )}
+                </td>
+                <td>
+                  <div className="action-buttons">
+                    <button
+                      className="small-btn edit-btn"
+                      onClick={() => setEditingTicket(ticket)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="small-btn delete-btn"
+                      onClick={() => handleDelete(ticket._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

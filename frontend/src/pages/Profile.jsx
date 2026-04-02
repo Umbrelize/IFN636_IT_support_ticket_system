@@ -1,96 +1,139 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
+  const { user, updateUser } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     university: '',
     address: '',
   });
-  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   useEffect(() => {
-    // Fetch profile data from the backend
     const fetchProfile = async () => {
-      setLoading(true);
       try {
-        const response = await axiosInstance.get('/api/auth/profile', {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        const response = await api.get('/api/auth/profile');
         setFormData({
-          name: response.data.name,
-          email: response.data.email,
+          name: response.data.name || '',
+          email: response.data.email || '',
           university: response.data.university || '',
           address: response.data.address || '',
         });
       } catch (error) {
-        alert('Failed to fetch profile. Please try again.');
+        setError(error.response?.data?.message || 'Failed to load profile');
       } finally {
-        setLoading(false);
+        setLoadingProfile(false);
       }
     };
 
-    if (user) fetchProfile();
-  }, [user]);
+    fetchProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
-      await axiosInstance.put('/api/auth/profile', formData, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      alert('Profile updated successfully!');
+      const response = await api.put('/api/auth/profile', formData);
+
+      updateUser(
+        {
+          id: response.data.id,
+          name: response.data.name,
+          email: response.data.email,
+          role: user?.role || response.data.role || 'user',
+          university: response.data.university || '',
+          address: response.data.address || '',
+        },
+        response.data.token
+      );
+
+      setSuccess('Profile updated successfully');
     } catch (error) {
-      alert('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
+      setError(error.response?.data?.message || 'Failed to update profile');
     }
   };
 
-  if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Your Profile</h1>
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="University"
-          value={formData.university}
-          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-          {loading ? 'Updating...' : 'Update Profile'}
-        </button>
-      </form>
+    <div className="main-content">
+      <div className="top-header">
+        <div>
+          <h1>Profile</h1>
+          <p>Manage your account details</p>
+        </div>
+      </div>
+
+      <div className="card form-card">
+        {loadingProfile ? (
+          <p>Loading profile...</p>
+        ) : (
+          <>
+            {error && <p className="error-text">{error}</p>}
+            {success && <p className="success-text">{success}</p>}
+
+            <form onSubmit={handleSubmit} className="ticket-form">
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>University</label>
+                <input
+                  type="text"
+                  name="university"
+                  value={formData.university}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <button type="submit" className="primary-btn">
+                Update Profile
+              </button>
+            </form>
+          </>
+        )}
+      </div>
     </div>
   );
 };

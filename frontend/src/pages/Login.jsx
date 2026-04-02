@@ -14,14 +14,15 @@ const Login = () => {
 
     try {
       const data = await login(formData);
-
+      console.log("LOGIN RESPONSE:", data);
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed. Please try again.');
+    console.log("ERROR:", error.response?.data);
+      setError(error.response?.data?.message || "Login failed. Please try again.");
     }
   };
 

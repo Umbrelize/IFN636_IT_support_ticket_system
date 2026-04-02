@@ -9,6 +9,7 @@ const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const [editingTicket, setEditingTicket] = useState(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -18,6 +19,8 @@ const Tickets = () => {
       } catch (error) {
         console.error('FETCH TICKETS ERROR:', error.response?.data || error.message);
         setError('Failed to fetch tickets.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -30,20 +33,25 @@ const Tickets = () => {
         {user?.role === 'admin' ? 'Manage Tickets' : 'My Tickets'}
       </h1>
 
+      {loading && <p>Loading tickets...</p>}
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <TicketForm
-        tickets={tickets}
-        setTickets={setTickets}
-        editingTicket={editingTicket}
-        setEditingTicket={setEditingTicket}
-      />
+      {!loading && !error && (
+        <>
+          <TicketForm
+            tickets={tickets}
+            setTickets={setTickets}
+            editingTicket={editingTicket}
+            setEditingTicket={setEditingTicket}
+          />
 
-      <TicketList
-        tickets={tickets}
-        setTickets={setTickets}
-        setEditingTicket={setEditingTicket}
-      />
+          <TicketList
+            tickets={tickets}
+            setTickets={setTickets}
+            setEditingTicket={setEditingTicket}
+          />
+        </>
+      )}
     </div>
   );
 };

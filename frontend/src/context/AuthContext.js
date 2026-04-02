@@ -33,11 +33,23 @@ export const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     const response = await api.post('/api/auth/login', formData);
 
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    // แปลง response backend ให้เป็น format ที่ frontend ใช้ต่อได้
+    const userData = {
+      id: response.data.id,
+      name: response.data.name,
+      email: response.data.email,
+      role: response.data.role || 'user', // fallback ไว้ก่อน ถ้า backend ยังไม่ส่ง role
+    };
 
-    setUser(response.data.user);
-    return response.data;
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(userData));
+
+    setUser(userData);
+
+    return {
+      token: response.data.token,
+      user: userData,
+    };
   };
 
   const register = async (formData) => {

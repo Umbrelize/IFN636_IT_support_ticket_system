@@ -33,8 +33,9 @@ const ticketSchema = new mongoose.Schema(
       default: 'Open',
     },
     image: {
-      type: String
-    }
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );

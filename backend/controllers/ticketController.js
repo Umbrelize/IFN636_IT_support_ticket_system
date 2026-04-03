@@ -3,7 +3,7 @@ const Ticket = require('../models/Ticket');
 // USER: create ticket
 const createTicket = async (req, res) => {
   try {
-    const { subject, description, category, priority, image} = req.body;
+    const { subject, description, category, priority } = req.body;
 
     if (!subject || !description) {
       return res.status(400).json({ message: 'Subject and description are required' });
@@ -15,7 +15,7 @@ const createTicket = async (req, res) => {
       description,
       category,
       priority,
-      image,
+      image: req.file ? `/uploads/${req.file.filename}` : '',
     });
 
     res.status(201).json(ticket);
@@ -66,11 +66,16 @@ const updateMyTicket = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const updatedTicket = await Ticket.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    ticket.subject = req.body.subject || ticket.subject;
+    ticket.description = req.body.description || ticket.description;
+    ticket.category = req.body.category || ticket.category;
+    ticket.priority = req.body.priority || ticket.priority;
+
+    if (req.file) {
+      ticket.image = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedTicket = await ticket.save();
 
     res.status(200).json(updatedTicket);
   } catch (error) {
@@ -98,10 +103,6 @@ const deleteMyTicket = async (req, res) => {
   }
 };
 
-
-
-///////////////////////////////////////////////////////////////////////////
-
 // ADMIN: read all tickets
 const getAllTickets = async (req, res) => {
   try {
@@ -110,6 +111,21 @@ const getAllTickets = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ADMIN: read any ticket by id
+const getAnyTicketById = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id).populate('user', 'name email role');
+
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    res.status(200).json(ticket);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -124,11 +140,17 @@ const updateAnyTicket = async (req, res) => {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    const updatedTicket = await Ticket.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    ticket.subject = req.body.subject || ticket.subject;
+    ticket.description = req.body.description || ticket.description;
+    ticket.category = req.body.category || ticket.category;
+    ticket.priority = req.body.priority || ticket.priority;
+    ticket.status = req.body.status || ticket.status;
+
+    if (req.file) {
+      ticket.image = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedTicket = await ticket.save();
 
     res.status(200).json(updatedTicket);
   } catch (error) {
@@ -159,6 +181,7 @@ module.exports = {
   updateMyTicket,
   deleteMyTicket,
   getAllTickets,
+  getAnyTicketById,
   updateAnyTicket,
   deleteAnyTicket,
 };

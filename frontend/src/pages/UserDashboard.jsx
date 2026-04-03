@@ -35,12 +35,13 @@ const UserDashboard = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const total = tickets.length;
-    const open = tickets.filter((ticket) => ticket.status === 'Open').length;
-    const inProgress = tickets.filter((ticket) => ticket.status === 'In Progress').length;
-    const closed = tickets.filter((ticket) => ticket.status === 'Closed').length;
-
-    return { total, open, inProgress, closed };
+    return {
+      total: tickets.length,
+      open: tickets.filter((ticket) => ticket.status === 'Open').length,
+      inProgress: tickets.filter((ticket) => ticket.status === 'In Progress').length,
+      resolved: tickets.filter((ticket) => ticket.status === 'Resolved').length,
+      closed: tickets.filter((ticket) => ticket.status === 'Closed').length,
+    };
   }, [tickets]);
 
   const recentTickets = tickets.slice(0, 5);
@@ -49,25 +50,55 @@ const UserDashboard = () => {
     <div className="dashboard-page">
       {error && <p className="error-text">{error}</p>}
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Tickets</h3>
-          <p>{stats.total}</p>
+      <div className="stats-grid stats-grid-user-five">
+        <div className="stat-card stat-card-clean stat-card-blue">
+          <div className="stat-icon-box">
+            <span className="stat-icon">🔵</span>
+          </div>
+          <div className="stat-content">
+            <h3>Total Tickets</h3>
+            <p>{stats.total}</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Open Tickets</h3>
-          <p>{stats.open}</p>
+        <div className="stat-card stat-card-clean stat-card-yellow">
+          <div className="stat-icon-box">
+            <span className="stat-icon">🔴</span>
+          </div>
+          <div className="stat-content">
+            <h3>Open Tickets</h3>
+            <p>{stats.open}</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>In Progress</h3>
-          <p>{stats.inProgress}</p>
+        <div className="stat-card stat-card-clean stat-card-orange">
+          <div className="stat-icon-box">
+            <span className="stat-icon">🟠</span>
+          </div>
+          <div className="stat-content">
+            <h3>In Progress</h3>
+            <p>{stats.inProgress}</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Closed Tickets</h3>
-          <p>{stats.closed}</p>
+        <div className="stat-card stat-card-clean stat-card-green">
+          <div className="stat-icon-box">
+            <span className="stat-icon">🟢</span>
+          </div>
+          <div className="stat-content">
+            <h3>Resolved</h3>
+            <p>{stats.resolved}</p>
+          </div>
+        </div>
+
+        <div className="stat-card stat-card-clean stat-card-teal">
+          <div className="stat-icon-box">
+            <span className="stat-icon">⚫</span>
+          </div>
+          <div className="stat-content">
+            <h3>Closed Tickets</h3>
+            <p>{stats.closed}</p>
+          </div>
         </div>
       </div>
 

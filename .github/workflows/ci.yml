@@ -1,22 +1,14 @@
-name: Backend CI
+name: Backend CI/CD
 
 on:
   push:
     branches:
       - main
-      - feature/cicd
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  test:
-    name: Run Backend Tests
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./backend
+  test-and-deploy:
+    name: Run Tests and Deploy
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -27,8 +19,45 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm install
+      - name: Show Node and npm version
+        run: |
+          node -v
+          npm -v
 
-      - name: Run tests
+      - name: Stop running PM2 services
+        run: pm2 stop all || true
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          npm install -g yarn
+          yarn --version
+          yarn install
+
+      - name: Install frontend dependencies and build
+        working-directory: ./frontend
+        run: |
+          df -h
+          sudo rm -rf build
+          yarn install
+          yarn build
+
+      - name: Run backend tests
+        working-directory: ./backend
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: ${{ secrets.PORT }}
         run: npm test
+
+      - name: Create backend .env from PROD secret
+        run: |
+          cd backend
+          rm -f .env
+          echo "${{ secrets.PROD }}" > .env
+
+      - name: Restart PM2 services
+        run: |
+          pm2 restart backend || pm2 start "npm run start" --name backend --cwd ./backend
+          pm2 restart Frontend || pm2 serve ./frontend/build 3000 --name Frontend --spa
+          pm2 save

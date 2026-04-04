@@ -24,9 +24,6 @@ jobs:
           node -v
           npm -v
 
-      - name: Stop running PM2 services
-        run: pm2 stop all || true
-
       - name: Install backend dependencies
         working-directory: ./backend
         run: |
@@ -56,8 +53,13 @@ jobs:
           rm -f .env
           echo "${{ secrets.PROD }}" > .env
 
-      - name: Restart PM2 services
+      - name: Recreate PM2 services
         run: |
-          pm2 restart backend || pm2 start "npm run start" --name backend --cwd ./backend
-          pm2 restart Frontend || pm2 serve ./frontend/build 3000 --name Frontend --spa
+          pm2 delete backend || true
+          pm2 delete Frontend || true
+          pm2 start "npm run start" --name backend --cwd ./backend
+          pm2 serve ./frontend/build 3000 --name Frontend --spa
           pm2 save
+
+      - name: Show PM2 status
+        run: pm2 status

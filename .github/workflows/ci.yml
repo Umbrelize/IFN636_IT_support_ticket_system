@@ -9,6 +9,7 @@ jobs:
   test-and-deploy:
     name: Run Tests and Deploy
     runs-on: self-hosted
+    environment: PROD
 
     steps:
       - name: Checkout code
@@ -47,11 +48,15 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: npm test
 
-      - name: Create backend .env from PROD secret
+      - name: Create backend .env from secrets
+        working-directory: ./backend
         run: |
-          cd backend
           rm -f .env
-          echo "${{ secrets.PROD }}" > .env
+          cat <<EOF > .env
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          PORT=${{ secrets.PORT }}
+          EOF
 
       - name: Recreate PM2 services
         run: |

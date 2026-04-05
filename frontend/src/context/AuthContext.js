@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (formData) => {
-    const response = await api.post('/api/auth/login', formData);
+    const response = await api.post('/auth/login', formData);
 
     const userData = {
       id: response.data.id,
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (formData) => {
-    const response = await api.post('/api/auth/register', formData);
+     const response = await api.post('/auth/register', formData);
     return response.data;
   };
 

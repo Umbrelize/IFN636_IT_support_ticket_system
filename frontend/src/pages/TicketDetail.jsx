@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
-const BACKEND_URL = 'http://localhost:5001';
+const BACKEND_URL = 'http://15.134.135.139';
 
 const getStatusClass = (status) => {
   if (status === 'Open') return 'badge badge-open';
@@ -38,8 +38,8 @@ const TicketDetail = () => {
     const fetchTicket = async () => {
       try {
         const endpoint = isAdmin
-          ? `/api/tickets/admin/${id}`
-          : `/api/tickets/${id}`;
+          ? `/tickets/admin/${id}`
+          : `/tickets/${id}`;
 
         const response = await api.get(endpoint);
         setTicket(response.data);

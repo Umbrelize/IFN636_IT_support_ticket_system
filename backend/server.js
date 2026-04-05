@@ -13,7 +13,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://15.134.135.139',
   credentials: true,
 }));
 app.use(express.json());

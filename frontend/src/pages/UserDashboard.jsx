@@ -24,7 +24,7 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get('/api/tickets');
+        const response = await api.get('/tickets');
         setTickets(response.data);
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load dashboard');

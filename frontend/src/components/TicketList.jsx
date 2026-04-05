@@ -13,8 +13,8 @@ const TicketList = ({
 
     try {
       const endpoint = isAdmin
-        ? `/api/tickets/admin/${ticketId}`
-        : `/api/tickets/${ticketId}`;
+        ? `/tickets/admin/${ticketId}`
+        : `/tickets/${ticketId}`;
 
       await api.delete(endpoint);
 

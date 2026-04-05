@@ -25,7 +25,7 @@ const AdminTicketStatusForm = ({
     setSubmitting(true);
 
     try {
-      const response = await api.put(`/api/tickets/admin/${editingTicket._id}`, {
+      const response = await api.put(`/tickets/admin/${editingTicket._id}`, {
         status,
       });
 

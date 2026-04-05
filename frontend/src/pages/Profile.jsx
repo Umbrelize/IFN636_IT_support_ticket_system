@@ -19,7 +19,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get('/api/auth/profile');
+        const response = await api.get('/auth/profile');
         setFormData({
           name: response.data.name || '',
           email: response.data.email || '',
@@ -49,7 +49,7 @@ const Profile = () => {
     setSuccess('');
 
     try {
-      const response = await api.put('/api/auth/profile', formData);
+      const response = await api.put('/auth/profile', formData);
 
       updateUser(
         {

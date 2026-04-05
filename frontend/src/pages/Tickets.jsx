@@ -14,7 +14,7 @@ const Tickets = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get('/api/tickets/admin/all');
+        const response = await api.get('/tickets/admin/all');
         setTickets(response.data);
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load tickets');

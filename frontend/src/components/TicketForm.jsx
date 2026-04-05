@@ -124,7 +124,7 @@ const TicketForm = ({
       const payload = buildPayload();
 
       if (!editingTicket) {
-        const response = await api.post('/api/tickets', payload, {
+        const response = await api.post('/tickets', payload, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -135,8 +135,8 @@ const TicketForm = ({
         }
       } else {
         const endpoint = isAdmin
-          ? `/api/tickets/admin/${editingTicket._id}`
-          : `/api/tickets/${editingTicket._id}`;
+          ? `/tickets/admin/${editingTicket._id}`
+          : `/tickets/${editingTicket._id}`;
 
         const response = await api.put(endpoint, payload, {
           headers: {
@@ -276,7 +276,7 @@ const TicketForm = ({
           {!previewUrl && existingImage && (
             <div style={{ marginTop: '12px' }}>
               <img
-                src={`http://localhost:5001${existingImage}`}
+                src={`http://15.134.135.139${existingImage}`}
                 alt="Current ticket"
                 style={{
                   width: '140px',

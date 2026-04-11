@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../axiosConfig';
+import api, { BACKEND_BASE_URL } from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
-
-const BACKEND_URL = 'http://15.134.135.139';
 
 const getStatusClass = (status) => {
   if (status === 'Open') return 'badge badge-open';
@@ -31,7 +29,7 @@ const TicketDetail = () => {
   const getImageSrc = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    return `${BACKEND_URL}${imagePath}`;
+    return `${BACKEND_BASE_URL}${imagePath}`;
   };
 
   useEffect(() => {

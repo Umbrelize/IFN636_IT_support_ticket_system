@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../axiosConfig';
+import api, { BACKEND_BASE_URL } from '../axiosConfig';
 
 const TicketForm = ({
   tickets = [],
@@ -276,7 +276,7 @@ const TicketForm = ({
           {!previewUrl && existingImage && (
             <div style={{ marginTop: '12px' }}>
               <img
-                src={`http://15.134.135.139${existingImage}`}
+                src={`${BACKEND_BASE_URL}${existingImage}`}
                 alt="Current ticket"
                 style={{
                   width: '140px',

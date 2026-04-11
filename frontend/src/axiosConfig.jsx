@@ -1,7 +1,16 @@
 import axios from 'axios';
 
+// Change this one value when your EC2 public IP changes
+export const BACKEND_BASE_URL = 'http://3.107.187.143';
+
+// API base URL for axios requests
+export const API_BASE_URL = `${BACKEND_BASE_URL}/api`;
+
+// Optional helper for uploaded images
+export const UPLOADS_BASE_URL = `${BACKEND_BASE_URL}/uploads`;
+
 const api = axios.create({
-  baseURL: 'http://15.134.135.139/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

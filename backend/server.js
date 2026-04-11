@@ -13,9 +13,10 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: 'http://15.134.135.139',
+  origin: true,
   credentials: true,
 }));
+
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
